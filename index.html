@@ -26,18 +26,32 @@
             margin-top: 20px;
             text-align: center;
         }
+        select {
+            margin: 10px 0;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>天气资讯</h1>
+        <select id="day-selector">
+            <option value="0">今天</option>
+            <option value="1">明天</option>
+            <option value="2">后天</option>
+        </select>
         <div class="weather-info" id="weather-info">
             正在加载天气信息...
         </div>
     </div>
 
     <script>
+        const daySelector = document.getElementById('day-selector');
+        daySelector.addEventListener('change', fetchWeather);
+
         function fetchWeather() {
+            const selectedDay = daySelector.value;
+
             const xhr = new XMLHttpRequest();
             xhr.open('GET', 'https://dev.makzan.net/module_b_api.php/weather.json?city=Macao', true);
             xhr.onload = function() {
@@ -47,19 +61,19 @@
                         console.log(data); // 打印返回的数据，查看结构
 
                         // 检查数据格式
-                        if (Array.isArray(data) && data.length > 0) {
+                        if (Array.isArray(data) && data.length > selectedDay) {
                             const clientDate = new Date();
-                            const todayData = data[0]; // 取第一个元素作为今天的数据
+                            const selectedData = data[selectedDay]; // 根据选择的天数获取数据
 
-                            const apiDate = new Date(todayData.date);
+                            const apiDate = new Date(selectedData.date);
 
                             document.getElementById('weather-info').innerHTML = `
-                                <h2>${todayData.location}</h2>
+                                <h2>${selectedData.location}</h2>
                                 <p>客户端时间: ${clientDate.toLocaleString()}</p>
                                 <p>API 返回时间: ${apiDate.toLocaleString()}</p>
-                                <p>天气状况: ${todayData.status}</p>
-                                <p>最低气温: ${todayData.lower_temperature}°C</p>
-                                <p>最高气温: ${todayData.upper_temperature}°C</p>
+                                <p>天气状况: ${selectedData.status}</p>
+                                <p>最低气温: ${selectedData.lower_temperature}°C</p>
+                                <p>最高气温: ${selectedData.upper_temperature}°C</p>
                             `;
                         } else {
                             console.error('数据格式错误:', data);
@@ -79,7 +93,7 @@
             xhr.send();
         }
 
-        fetchWeather();
+        fetchWeather(); // 初始加载天气
     </script>
 </body>
 </html>
