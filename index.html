@@ -1,1 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气资讯</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .weather-info {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>天气资讯</h1>
+        <div class="weather-info" id="weather-info">
+            正在加载天气信息...
+        </div>
+    </div>
 
+    <script>
+        function fetchWeather() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://dev.makzan.net/module_b_api.php/weather.json?city=Macao', true);
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        console.log(data); // 打印返回的数据，查看结构
+
+                        // 检查数据格式
+                        if (Array.isArray(data) && data.length > 0) {
+                            const clientDate = new Date();
+                            const todayData = data[0]; // 取第一个元素作为今天的数据
+
+                            const apiDate = new Date(todayData.date);
+
+                            document.getElementById('weather-info').innerHTML = `
+                                <h2>${todayData.location}</h2>
+                                <p>客户端时间: ${clientDate.toLocaleString()}</p>
+                                <p>API 返回时间: ${apiDate.toLocaleString()}</p>
+                                <p>天气状况: ${todayData.status}</p>
+                                <p>最低气温: ${todayData.lower_temperature}°C</p>
+                                <p>最高气温: ${todayData.upper_temperature}°C</p>
+                            `;
+                        } else {
+                            console.error('数据格式错误:', data);
+                            document.getElementById('weather-info').innerHTML = '数据格式错误，请检查 API 响应。';
+                        }
+                    } catch (error) {
+                        console.error('JSON 解析错误:', error);
+                        document.getElementById('weather-info').innerHTML = '解析数据时出错。';
+                    }
+                } else {
+                    document.getElementById('weather-info').innerHTML = '无法获取天气信息，请稍后再试。';
+                }
+            };
+            xhr.onerror = function() {
+                document.getElementById('weather-info').innerHTML = '请求失败，请稍后再试。';
+            };
+            xhr.send();
+        }
+
+        fetchWeather();
+    </script>
+</body>
+</html>
